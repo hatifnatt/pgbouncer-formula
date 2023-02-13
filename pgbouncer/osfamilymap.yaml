@@ -1,0 +1,57 @@
+# If you do not need to provide defaults via the `os_family` grain,
+# you will need to provide at least an empty dict in this file, e.g.
+# osfamilymap: {}
+---
+Debian:
+  env:
+    file: /etc/default/pgbouncer
+  repo:
+    prerequisites: []
+    keyring:
+      src: salt://pgbouncer/files/postgresql-archive-keyring-ACCC4CF8.gpg
+      dst: /usr/share/keyrings/postgresql-archive-keyring.gpg
+      skip_verify: true
+    config:
+      - name: >
+          deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg]
+          https://apt.postgresql.org/pub/repos/apt {{ grains.oscodename|lower}}-pgdg main
+        file: /etc/apt/sources.list.d/postgresql.list
+        # key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        clean_file: true
+      - name: >
+          deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg]
+          https://apt-archive.postgresql.org/pub/repos/apt {{ grains.oscodename|lower}}-pgdg-archive main
+        file: /etc/apt/sources.list.d/postgresql-archive.list
+        # key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        clean_file: true
+
+RedHat:
+  env:
+    file: /etc/sysconfig/pgbouncer
+  package:
+    prereq_pkgs:
+      - python3-dnf-plugin-versionlock
+  repo:
+    prerequisites: []
+    keyring:
+      src: https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG
+      dst: /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
+      skip_verify: true
+    # RedHat repo require PostgreSQL version in URL so it's problematic to configure it
+    # without knowledge of PostgreSQL version, leaving unresolved for now
+    # TODO: support RedHat family
+    config: []
+    {# config:
+      - humanname: PostgreSQL common RPMs for RHEL/CentOS $releasever - $basearch
+        name: pgdg-common
+        baseurl: https://download.postgresql.org/pub/repos/yum/common/redhat/rhel-$releasever-$basearch
+        enabled: true
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
+        gpgcheck: 1
+      # check postgresql formula for information about `version` variable
+      - humanname: PostgreSQL {{ version.str }} for RHEL/CentOS $releasever - $basearch
+        name: pgdg{{ version.no_dot }}
+        baseurl: https://download.postgresql.org/pub/repos/yum/{{ version.str }}/redhat/rhel-$releasever-$basearch
+        enabled: true
+        gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
+        gpgcheck: 1 #}

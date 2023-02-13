@@ -1,0 +1,19 @@
+{% from tplroot ~ "/map.jinja" import pgbouncer as pgb -%}
+[Unit]
+Description=connection pooler for PostgreSQL
+Documentation=man:pgbouncer(1)
+Documentation=https://www.pgbouncer.org/
+After=network.target
+#Requires=pgbouncer.socket
+
+[Service]
+Type=notify
+User={{ pgb.user }}
+EnvironmentFile={{ pgb.env.file }}
+ExecStart={{ pgb.bin }} {{ pgb.config.file }}
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+#LimitNOFILE=1024
+
+[Install]
+WantedBy=multi-user.target

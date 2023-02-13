@@ -1,0 +1,67 @@
+---
+pgbouncer:
+  version: 1.17.0-4
+  install: true
+  use_upstream: repo # package, repo / binary, archive
+  user: postgres
+  group: postgres
+  home: /var/lib/postgresql
+  root_user: root
+  root_group: root
+  bin: /usr/sbin/pgbouncer
+  service:
+    name: pgbouncer
+    status: running
+    on_boot_state: enabled
+    reload: false
+    systemd:
+      unit_dir: /etc/systemd/system
+  binary: {}
+  package:
+    prereq_pkgs: []
+    pkgs_extra: []
+    pkgs:
+      - pgbouncer
+    hold: false
+    update_holds: true
+    install_recommends: true
+  repo:
+    # Check osafamilymap.yaml for more examples
+    # List of packages to install before configuring zabbix repository
+    # i.e. for Debian family
+    prerequisites:
+      - apt-transport-https
+      - ca-certificates
+      - debian-archive-keyring
+    # Repository configurationm will be used as pkgrepo.managed parameters
+    keyring:
+      src: salt://pgbouncer/files/postgresql-archive-keyring-ACCC4CF8.gpg
+      dst: /usr/share/keyrings/postgresql-archive-keyring.gpg
+      skip_verify: true
+    config:
+      # i.e. for Debian family
+      name: >
+        deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg]
+        https://apt.postgresql.org/pub/repos/apt {{ grains.oscodename|lower}}-pgdg main
+      file: /etc/apt/sources.list.d/postgresql.list
+      # key_url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+      clean_file: true
+  env:
+    file: /etc/default/pgbouncer
+    options: {}
+  config:
+    file: /etc/pgbouncer/pgbouncer.ini
+    template: pgbouncer.ini.jinja
+    show_changes: true
+    data:
+      databases: {}
+      users: {}
+      pgbouncer:
+        logfile: /var/log/postgresql/pgbouncer.log
+        pidfile: /var/run/postgresql/pgbouncer.pid
+        listen_addr: localhost
+        listen_port: 6432
+        unix_socket_dir: /var/run/postgresql
+        auth_type: md5
+        auth_file: /etc/pgbouncer/userlist.txt
+  userlist: {}
