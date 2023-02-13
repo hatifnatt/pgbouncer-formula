@@ -26,6 +26,14 @@ pgbouncer:
     update_holds: true
     install_recommends: true
   repo:
+    # How to configure official PostgreSQL repository
+    # skip - do not manage repository at all
+    #        assume it's already configured or system repository have required packages
+    # manage - this formula will manage repository configuration
+    # include - state from another formula will be included to manage repository
+    config_method: skip
+    # Use postgresql formula to manage postgresql repository looks like a good idea
+    include: postgresql.repo
     # Check osafamilymap.yaml for more examples
     # List of packages to install before configuring zabbix repository
     # i.e. for Debian family
@@ -33,7 +41,7 @@ pgbouncer:
       - apt-transport-https
       - ca-certificates
       - debian-archive-keyring
-    # Repository configurationm will be used as pkgrepo.managed parameters
+    # Repository configuration will be used as pkgrepo.managed parameters
     keyring:
       src: salt://pgbouncer/files/postgresql-archive-keyring-ACCC4CF8.gpg
       dst: /usr/share/keyrings/postgresql-archive-keyring.gpg
